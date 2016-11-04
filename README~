@@ -1,0 +1,8 @@
+INSTRUCTIONS:
+This is a image generator based on blender.
+
+1) modify blender directory in generate_pictures.py
+
+2) run: python generate_pictures.py
+
+3) see generated picture in folder rendered_images

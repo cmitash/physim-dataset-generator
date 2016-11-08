@@ -94,7 +94,7 @@ syn_images_folder = 'rendered_images'
 if not os.path.exists(syn_images_folder):
     os.mkdir(syn_images_folder)
 
-num_of_images = 15000
+num_of_images = 10
 start = time.time()
 
 try:

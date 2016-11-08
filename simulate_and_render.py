@@ -33,6 +33,13 @@ K = Matrix(([619.444214, 0.0, 320],[0.0, 619.444336, 240],[0.0, 0.0, 1.0 ]))
 cam_location = [[0.5, 0, 0.12], [0.5, -0.15, 0.12], [0.5, 0.15, 0.12], [0.5, 0, 0.3]]
 cam_rotation = [[0.5, 0.5, 0.5, 0.5], [0.612, 0.612, 0.354, 0.354], [0.354, 0.354, 0.612, 0.612], [0.612, 0.354, 0.354, 0.612]]
 
+# Object Files (.obj)
+object_file_list = ["crayola_24_ct", "expo_dry_erase_board_eraser", "folgers_classic_roast_coffee",
+                    "scotch_duct_tape", "dasani_water_bottle", "jane_eyre_dvd",
+                    "up_glucose_bottle", "laugh_out_loud_joke_book", "soft_white_lightbulb",
+                    "kleenex_tissue_box", "ticonderoga_12_pencils", "dove_beauty_bar",
+                    "dr_browns_bottle_brush", "elmers_washable_no_run_school_glue", "rawlings_baseball" ]
+
 # Creates a blender camera consistent with a given intrinsic matrix
 def set_camera_using_intrinsics():
     scene = bpy.context.scene
@@ -127,7 +134,7 @@ def camera_view_bounds_2d(me_ob):
     return (min_x, min_y, max_x - min_x, max_y - min_y)
 
 def inside_shelf(me_ob):
-    shelf_dims = Vector((0.43,0.28,0.22))
+    shelf_dims = Vector((0.43,0.28,0.22)) # (x, y, z) dimensions
 
     if me_ob.matrix_world.translation[0] < (-shelf_dims[0]/2) or \
        me_ob.matrix_world.translation[0] > (shelf_dims[0]/2) or \
@@ -170,6 +177,10 @@ def write_bounds_2d(filepath, me_ob):
             file.write(",%i,%i,%i,%i,%f\n" % (x, y, width, height, me_ob.matrix_world.translation[0]))
             return x, y, width, height
 
+############################################################################
+##### SIMULATE AND RENDER ##################################################
+############################################################################
+
 # Input parameters
 num_of_images = int(sys.argv[-3])
 env = sys.argv[-2]
@@ -187,10 +198,7 @@ if env == 'table':
 
     objects["Table"].location = [0, 0, 0]
     objects["Table"].rotation_mode = 'QUATERNION'
-    objects["Table"].rotation_quaternion[0] = 0.7
-    objects["Table"].rotation_quaternion[1] = 0.7
-    objects["Table"].rotation_quaternion[2] = 0
-    objects["Table"].rotation_quaternion[2] = 0
+    objects["Table"].rotation_quaternion = [0.7, 0.7, 0, 0]
 
     scene.objects.active = scene.objects["Table"]
     bpy.ops.rigidbody.object_add(type='ACTIVE')
@@ -200,57 +208,20 @@ if env == 'table':
     objects["Table"].rigid_body.collision_margin = 0.01
 
 elif env == 'shelf':
-    shape_file = 'table_models/finalshelf.obj'
+    shape_file = 'table_models/shelf.obj'
     bpy.ops.import_scene.obj(filepath=shape_file)
-    objects['Plane'].location[0] = -1
-    objects['Plane.001'].location[0] = -1
-    objects['Plane.002'].location[0] = -1
-    objects['Plane.003'].location[0] = -1
-    objects['Plane.004'].location[0] = -1
-    objects["Plane.005_Plane.006"].location[0] = -1
 
-    scene.objects.active = scene.objects["Plane"]
-    bpy.ops.rigidbody.object_add(type='ACTIVE')
-    bpy.ops.object.modifier_add(type = 'COLLISION')
-    objects["Plane"].rigid_body.enabled = False
-    objects["Plane"].rigid_body.use_margin = True
-    objects["Plane"].rigid_body.collision_margin = 0.01
-
-    scene.objects.active = scene.objects["Plane.001"]
-    bpy.ops.rigidbody.object_add(type='ACTIVE')
-    bpy.ops.object.modifier_add(type = 'COLLISION')
-    objects["Plane.001"].rigid_body.enabled = False
-    objects["Plane.001"].rigid_body.use_margin = True
-    objects["Plane.001"].rigid_body.collision_margin = 0.01
-
-    scene.objects.active = scene.objects["Plane.002"]
-    bpy.ops.rigidbody.object_add(type='ACTIVE')
-    bpy.ops.object.modifier_add(type = 'COLLISION')
-    objects["Plane.002"].rigid_body.enabled = False
-    objects["Plane.002"].rigid_body.use_margin = True
-    objects["Plane.002"].rigid_body.collision_margin = 0.01
-
-    scene.objects.active = scene.objects["Plane.003"]
-    bpy.ops.rigidbody.object_add(type='ACTIVE')
-    bpy.ops.object.modifier_add(type = 'COLLISION')
-    objects["Plane.003"].rigid_body.enabled = False
-    objects["Plane.003"].rigid_body.use_margin = True
-    objects["Plane.003"].rigid_body.collision_margin = 0.01
-
-    scene.objects.active = scene.objects["Plane.004"]
-    bpy.ops.rigidbody.object_add(type='ACTIVE')
-    bpy.ops.object.modifier_add(type = 'COLLISION')
-    objects["Plane.004"].rigid_body.enabled = False
-    objects["Plane.004"].rigid_body.use_margin = True
-    objects["Plane.004"].rigid_body.collision_margin = 0.01
-
-    scene.objects.active = scene.objects["Plane.005_Plane.006"]
-    bpy.ops.rigidbody.object_add(type='ACTIVE')
-    bpy.ops.object.modifier_add(type = 'COLLISION')
-    objects["Plane.005_Plane.006"].rigid_body.enabled = False
-    objects["Plane.005_Plane.006"].rigid_body.use_margin = True
-    objects["Plane.005_Plane.006"].rigid_body.collision_margin = 0.01
-    objects["Plane.005_Plane.006"].hide_render = True
+    print ("objects are :")
+    for planes in bpy.data.objects:
+        if 'Plane' in planes.name:
+            print (planes.name)
+            scene.objects.active = planes
+            bpy.ops.rigidbody.object_add(type='ACTIVE')
+            bpy.ops.object.modifier_add(type = 'COLLISION')
+            planes.rigid_body.enabled = False
+            planes.rigid_body.use_margin = True
+            planes.rigid_body.collision_margin = 0.01
+    objects["Plane.Front"].hide_render = True
 
 # set camera
 set_camera_using_intrinsics()
@@ -269,12 +240,6 @@ objects['Point'].data.use_specular = False
 objects['Point'].data.shadow_method = 'RAY_SHADOW'
 objects['Point'].data.shadow_ray_samples = 2
 objects['Point'].data.shadow_soft_size = 0.5
-
-object_file_list = ["crayola_24_ct", "expo_dry_erase_board_eraser", "folgers_classic_roast_coffee",
-                    "scotch_duct_tape", "dasani_water_bottle", "jane_eyre_dvd",
-                    "up_glucose_bottle", "laugh_out_loud_joke_book", "soft_white_lightbulb",
-                    "kleenex_tissue_box", "ticonderoga_12_pencils", "dove_beauty_bar",
-                    "dr_browns_bottle_brush", "elmers_washable_no_run_school_glue", "rawlings_baseball" ]
 
 # import objects to blender
 objectlist = []

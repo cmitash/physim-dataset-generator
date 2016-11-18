@@ -1,9 +1,17 @@
 Render physically realistic cluttered scenes using 3D CAD models and extract bounding box labels to train CNN based object detectors.
 
 Steps to use :-
-1) chose an environment : shelf, table-top, create your own.
-2) select objects : use included models from Amazon Picking Challenge or use your own models.
-3) number of images : input the number of images to render.
+1) chose an environment : shelf, table-top, create your own (default : shelf)
+2) select objects : use included models from Amazon Picking Challenge or use your own models (default : 15 APC objects)
+3) number of images : input the number of images to render ( = 10)
 4) install Blender and set $BLENDER_PATH in bashrc.
-5) run "python generate_scenes.py".
+5) run "python generate_pictures.py".
 
+How to :-
+1) change environment : in the file "generate_pictures.py" change shelf -> table in "render_cmd" setting.
+2) to use different object models : add 3D models to the folder "object_models", add the object to the list of objects in 
+  "generate_pictures.py" and "simulate_and_render.py".
+  
+Output :-
+1) generated images are present in folder "rendered_images"
+2) labelled bounding boxe files for each scene <label, tl_x, tl_y, br_x, br_y>

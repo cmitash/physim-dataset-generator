@@ -1,0 +1,22 @@
+camera:
+  num_poses: 4
+  camera_poses: [[0.5, 0, 0.12, 0.5, 0.5, 0.5, 0.5], [0.5, -0.15, 0.12, 0.612, 0.612, 0.354, 0.354], [0.5, 0.15, 0.12, 0.354, 0.354, 0.612, 0.612], [0.5, 0, 0.3, 0.612, 0.354, 0.354, 0.612]]
+  camera_intrinsics: [[619.444214, 0.0, 320],[0.0, 619.444336, 240],[0.0, 0.0, 1.0]]
+
+rest_surface:
+  type: shelf
+  surface_pose: [0, 0, 0, 0, 0, 0, 1]
+
+Models: [crayola_24_ct, expo_dry_erase_board_eraser, folgers_classic_roast_coffee, 
+scotch_duct_tape, dasani_water_bottle, jane_eyre_dvd, up_glucose_bottle, laugh_out_loud_joke_book,
+soft_white_lightbulb, kleenex_tissue_box, ticonderoga_12_pencils, dove_beauty_bar, dr_browns_bottle_brush,
+elmers_washable_no_run_school_glue, rawlings_baseball]
+
+params:
+  num_images: 10
+  minimum_objects_in_scene: 2
+  maximum_objects_in_scene: 4
+  range_x: [-0.20, 0.15]
+  range_y: [-0.12, 0.12]
+  range_z: [0.08, 0.12]
+  num_simulation_steps: 80

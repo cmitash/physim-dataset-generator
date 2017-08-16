@@ -13,20 +13,13 @@ class Shelf:
                 planes.rigid_body.use_margin = True
                 planes.rigid_body.collision_margin = 0.01
                 bpy.data.objects["Plane.Front"].hide_render = True
+        bpy.data.materials["None"].use_shadeless = True
+        bpy.data.materials["None_shelfside.JPG"].use_shadeless = True
+        bpy.data.materials["None_shelftop.JPG"].use_shadeless = True
+        bpy.data.materials["None_shelftop.JPG_shelftop.JPG"].use_shadeless = True
 
-    def inside_shelf(me_ob):
-        shelf_dims = Vector((0.43,0.28,0.22)) # (x, y, z) dimensions
-
-        if me_ob.matrix_world.translation[0] < (-shelf_dims[0]/2) or \
-           me_ob.matrix_world.translation[0] > (shelf_dims[0]/2) or \
-           me_ob.matrix_world.translation[1] < (-shelf_dims[1]/2) or \
-           me_ob.matrix_world.translation[1] > (shelf_dims[1]/2) or \
-           me_ob.matrix_world.translation[2] < 0 or \
-           me_ob.matrix_world.translation[2] > (shelf_dims[2]):
-            print("Object is out of shelf : ", me_ob.matrix_world.translation)
-            return 0 
-        else:
-            return 1
+    def setPose(self, pose):
+        return
 
 class Table:
     def __init__(self, shape_file):
@@ -42,6 +35,13 @@ class Table:
         object_instance.rigid_body.enabled = False
         object_instance.rigid_body.use_margin = True
         object_instance.rigid_body.collision_margin = 0.01
+        bpy.data.materials["WHITE_PLASTIC"].use_shadeless = True
+
+    def setPose(self, pose):
+        object_instance = bpy.data.objects["Table"]
+        object_instance.location = [pose[0], pose[1], pose[2]]
+        object_instance.rotation_mode = 'QUATERNION'
+        object_instance.rotation_quaternion = [pose[3], pose[4], pose[5], pose[6]]
 
 class Light:
     lightColors = [[255,197,142], [255,214,170], [255,241,224],
@@ -63,10 +63,10 @@ class Light:
         bpy.data.objects['Point'].data.shadow_ray_samples = 2
         bpy.data.objects['Point'].data.shadow_soft_size = 0.5
 
-    def placePointLight(self):
-        lx = random.uniform(0.8, 1.2)
-        ly = random.uniform(-0.12, 0.12)
-        lz = random.uniform(0.12, 0.42)
+    def placePointLight(self, light_range_x, light_range_y, light_range_z):
+        lx = random.uniform(light_range_x[0], light_range_x[1])
+        ly = random.uniform(light_range_y[0], light_range_y[1])
+        lz = random.uniform(light_range_z[0], light_range_z[1])
         bpy.data.objects['Point'].location = [lx, ly, lz]
         bpy.data.objects['Point'].data.energy = random.randint(0, 4)
         color_idx = random.randint(0, len(self.lightColors) - 1)

@@ -10,6 +10,9 @@ class ConfigParser:
 	def getSurfaceType(self):
 		return self.data['rest_surface']['type']
 
+	def getSurfacePose(self):
+		return self.data['rest_surface']['surface_pose']
+
 	def getCamIntrinsic(self):
 		return self.data['camera']['camera_intrinsics']
 
@@ -42,3 +45,12 @@ class ConfigParser:
 
 	def getNumViews(self):
 		return self.data['camera']['num_poses']
+
+	def getLightRangeX(self):
+		return self.data['params']['light_position_range_x']
+
+	def getLightRangeY(self):
+		return self.data['params']['light_position_range_y']
+
+	def getLightRangeZ(self):
+		return self.data['params']['light_position_range_z']

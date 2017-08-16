@@ -25,6 +25,8 @@ if __name__ == "__main__":
         surface = Table('surface_models/table/table.obj')
     elif env == 'shelf':
         surface = Shelf('surface_models/shelf/shelf.obj')
+    sPose = cfg.getSurfacePose()
+    surface.setPose(sPose)
 
     ## initialize camera
     camIntrinsic = cfg.getCamIntrinsic()
@@ -43,6 +45,7 @@ if __name__ == "__main__":
         imported = bpy.context.selected_objects[0]
         objectlist.append(imported.name)
     for item in bpy.data.materials:
+        print (item)
         item.emit = 0.05
 
     num = 0
@@ -94,15 +97,21 @@ if __name__ == "__main__":
             bpy.ops.object.modifier_add(type = 'COLLISION')
             bpy.context.scene.objects[shape_file].rigid_body.mass = 10.0
             bpy.context.scene.objects[shape_file].rigid_body.use_margin = True
-            bpy.context.scene.objects[shape_file].rigid_body.collision_margin = 0.005
+            bpy.context.scene.objects[shape_file].rigid_body.collision_margin = 0
+            bpy.context.scene.objects[shape_file].rigid_body.linear_damping = 0.9
+            bpy.context.scene.objects[shape_file].rigid_body.angular_damping = 0.9
+
 
         ## performing simulation
         framesIter = cfg.getNumSimulationSteps()
         for i in range(1,framesIter):
             bpy.context.scene.frame_set(i)
 
-        ## pick lighting 
-        pLight.placePointLight()
+        ## pick lighting
+        light_range_x = cfg.getLightRangeX()
+        light_range_y = cfg.getLightRangeY()
+        light_range_z = cfg.getLightRangeZ()
+        pLight.placePointLight(light_range_x, light_range_y, light_range_z)
 
         ## rendering configuration
         for area in bpy.context.screen.areas:
@@ -112,9 +121,8 @@ if __name__ == "__main__":
                     if space.type == 'VIEW_3D':
                         space.viewport_shade = 'TEXTURED'
 
-        bpy.data.scenes['Scene'].render.use_raytrace = False
-        bpy.context.scene.render.use_shadows = False
-        bpy.data.worlds['World'].light_settings.use_ambient_occlusion = False
+        bpy.context.scene.render.use_raytrace = True
+        bpy.context.scene.render.use_shadows = True
 
         for i in range(0,cam.numViews):
             cam.placeCamera(i)
@@ -131,9 +139,9 @@ if __name__ == "__main__":
                 x, y, width, height = cam.write_bounds_2d(output_bbox, bpy.data.objects[shape_file], index)
 
             # save to temp.blend
-            # mainfile_path = os.path.join("rendered_images", "blend_%05d.blend" % num)
-            # bpy.ops.file.autopack_toggle()
-            # bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
+            mainfile_path = os.path.join("rendered_images/debug/", "blend_%05d.blend" % num)
+            bpy.ops.file.autopack_toggle()
+            bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
 
             num = num + 1
             if num >= numImages:

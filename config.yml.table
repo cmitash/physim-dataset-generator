@@ -1,11 +1,11 @@
 camera:
-  num_poses: 4
-  camera_poses: [[0.5, 0, 0.12, 0.5, 0.5, 0.5, 0.5], [0.5, -0.15, 0.12, 0.612, 0.612, 0.354, 0.354], [0.5, 0.15, 0.12, 0.354, 0.354, 0.612, 0.612], [0.5, 0, 0.3, 0.612, 0.354, 0.354, 0.612]]
+  num_poses: 3
+  camera_poses: [[0.56862, 0.46318, 0.85590, 0.2933, 0.0127, -0.4534, -0.8416], [0.41505, -0.0671, 1.13025, 0.6125, 0.2030, -0.1350, -0.7519], [6.99696481e-01, 5.00843585e-01, 7.46752262e-01, 0.816, -0.509, 0.041, 0.271]]
   camera_intrinsics: [[619.444214, 0.0, 320],[0.0, 619.444336, 240],[0.0, 0.0, 1.0]]
 
 rest_surface:
-  type: shelf
-  surface_pose: [0, 0, 0, 0, 0, 0, 1]
+  type: table
+  surface_pose: [0.80, 0, -0.30, 0.7, 0.7, 0, 0]
 
 Models: [crayola_24_ct, expo_dry_erase_board_eraser, folgers_classic_roast_coffee, 
 scotch_duct_tape, dasani_water_bottle, jane_eyre_dvd, up_glucose_bottle, laugh_out_loud_joke_book,
@@ -16,10 +16,10 @@ params:
   num_images: 10
   minimum_objects_in_scene: 2
   maximum_objects_in_scene: 4
-  range_x: [-0.20, 0.15]
-  range_y: [-0.12, 0.12]
-  range_z: [0.08, 0.12]
+  range_x: [0.75, 0.85]
+  range_y: [-0.08, 0.08]
+  range_z: [0.55, 0.60]
   num_simulation_steps: 80
-  light_position_range_x: [0.8, 1.2]
+  light_position_range_x: [0.6, 1.2]
   light_position_range_y: [-0.12, 0.12]
-  light_position_range_z: [0.12, 0.42]
+  light_position_range_z: [1.0, 1.5]

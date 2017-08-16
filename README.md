@@ -19,8 +19,8 @@ To cite the work:
 ```
 ### Setup
 1. Download and extract Blender (https://www.blender.org/features/releases/2-78/)
-2. In bashrc, add line 'export $BLENDER_PATH=/path-to-blender-folder/blender'
-3. Install the 'yaml' package in the python packaged with blender.
+2. In bashrc, add line ```export $BLENDER_PATH=/path-to-blender-folder/blender```
+3. Install the ```yaml``` package in the python packaged with blender.
 
 ```shell
 get the 'get-pip.py' file from the pip documentation(https://pip.pypa.io/en/stable/installing/)
@@ -29,21 +29,21 @@ $ /blender-path/2.xx/python/bin/python /blender-version/2.xx/python/local/lib/py
 ```
 
 ### Demo
-1. '''git clone https://github.com/cmitash/physim-dataset-generator.git '''
-2. in bashrc add line 'export PHYSIM_GENDATA=/path-to-repository'
-3. rename 'config.yml.table' or 'config.yml.shelf' to 'config.yml'
-4. '''python generate_pictures.py '''
-5. the generated data can be found in the folder 'rendered_images'.
+1. ```git clone https://github.com/cmitash/physim-dataset-generator.git```
+2. in bashrc add line ```export PHYSIM_GENDATA=/path-to-repository```
+3. rename ```config.yml.table``` or ```config.yml.shelf``` to ```config.yml```
+4. ```python generate_pictures.py```
+5. the generated data can be found in the folder ```rendered_images```
 
 ### Output
 1. images of scenes.
-2. labeled bounding box files for each scene <label, tl_x, tl_y, br_x, br_y>.
+2. labeled bounding box files for each scene ```<label, tl_x, tl_y, br_x, br_y>```
 3. debug images indicating the bounding-boxes over the objects.
-4. '''.blend''' files to debug the simulation parameters.
+4. ```.blend``` files to debug the simulation parameters.
 
 ### Parameters
 the example cfg files contain the parameters of simulation.
-'''shell
+```shell
 camera:
   num_poses: <number of views to render from>
   camera_poses: [[pos_x, pos_y, pos_z, quat_w, quat_x, quat_y, quat_z], ...]
@@ -66,4 +66,4 @@ params:
   light_position_range_x: [<min_x>, <max_x>]
   light_position_range_y: [<min_y>, <max_y>]
   light_position_range_z: [<min_z>, <max_z>]
-'''
+```

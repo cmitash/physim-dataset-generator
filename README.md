@@ -29,16 +29,14 @@ $ /path/to/blender/2.xx/python/bin/python /blender-version/2.xx/python/local/lib
 ```
 
 ### Demo
-1. ```git clone https://github.com/cmitash/physim-dataset-generator.git```
-2. In ```~/.bashrc```, add line ```export PHYSIM_GENDATA=/path/to/repo```
-3. Rename ```config.yml.table``` or ```config.yml.shelf``` to ```config.yml```
-4. ```python generate_pictures.py```
-5. The generated data can be found in the folder ```rendered_images```
+In ```~/.bashrc```, add line ```export PHYSIM_GENDATA=/path/to/repo```
+```python generate_pictures.py -env=table```
+The generated data can be found in the folder ```rendered_images```. Available environments are ```table`` and ```shelf```.
 
 ### Output
-1. images of scenes.
-2. labeled bounding box files for each scene ```<label, tl_x, tl_y, br_x, br_y>```
-3. debug images indicating the bounding-boxes over the objects.
+1. Images of scenes.
+2. Labeled bounding box files for each scene ```<label, tl_x, tl_y, br_x, br_y>```
+3. Debug images indicating the bounding-boxes over the objects.
 4. ```.blend``` files to debug the simulation parameters.
 
 ### Parameters

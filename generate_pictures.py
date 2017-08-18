@@ -3,7 +3,8 @@ import os.path as osp
 import time, random
 from datetime import datetime
 
-from ConfigParser import ConfigParser
+# from ConfigParser import ConfigParser
+import argparse
 import Label
 
 random.seed(datetime.now())
@@ -35,7 +36,15 @@ try:
 except:
     print('render failed. render_cmd: %s' % (render_cmd))
 
-cfg = ConfigParser("config.yml")
+parser = argparse.ArgumentParser()
+parser.add_argument('-env', help='shelf | table', default='shelf')
+args = vars(parser.parse_args())
+
+if args['env'] == "table":
+	cfg = ConfigParser("config.yml.table")
+else:
+	cfg = ConfigParser("config.yml.shelf")
+
 num_of_images = cfg.getNumTrainingImages()
 pLabel = Label.Label()
 pLabel.draw_bboxes(syn_images_folder, num_of_images)

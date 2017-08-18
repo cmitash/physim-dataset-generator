@@ -1,7 +1,7 @@
 ## PHYSIM-DATASET-GENERATOR
 This repository implements a software tool for synthesizing images of physically realistic cluttered scenes 
 using 3D CAD models as described in our paper:
-#### A Self-supervised Learning System for Object Detection using Physics Simulation and Multi-view Pose Estimation ([pdf](https://arxiv.org/pdf/1703.03347.pdf))
+#### A Self-supervised Learning System for Object Detection using Physics Simulation and Multi-view Pose Estimation ([pdf](https://arxiv.org/pdf/1703.03347.pdf))([website](http://paul.rutgers.edu/~cm1074/PHYSIM.html))
 By Chaitanya Mitash, Kostas Bekris, Abdeslam Boularias (Rutgers University).
 
 To appear at the IEEE International Conference on Intelligent Robots and Systems (IROS), Vancouver, Canada, 2017.
@@ -9,7 +9,7 @@ To appear at the IEEE International Conference on Intelligent Robots and Systems
 ### Citing
 To cite the work:
 
-```shell
+```
 @article{physim,
   title={A Self-supervised Learning System for Object Detection using Physics Simulation and Multi-view Pose Estimation},
   author={Mitash, Chaitanya and Bekris, Kostas and Boularias, Abdeslam},
@@ -18,27 +18,25 @@ To cite the work:
 }
 ```
 ### Setup
-1. Download and extract Blender (https://www.blender.org/features/releases/2-78/)
-2. In bashrc, add line ```export $BLENDER_PATH=/path-to-blender-folder/blender```
-3. Install the ```yaml``` package in the python packaged with blender.
+1. Download and extract [Blender](https://www.blender.org/features/releases/2-78/)
+2. In ```~/.bashrc```, add line ```export $BLENDER_PATH=/path/to/blender/blender```
+3. Get the ```get-pip.py``` file from the ```pip``` [documentation](https://pip.pypa.io/en/stable/installing/)
+4. Install the ```yaml``` package in the python packaged with blender using the commands below.
 
 ```shell
-get the 'get-pip.py' file from the pip documentation(https://pip.pypa.io/en/stable/installing/)
-$ /path/to/blender/blender-path/2.xx/python/bin/python3 ~/get-pip.py
-$ /blender-path/2.xx/python/bin/python /blender-version/2.xx/python/local/lib/python3.5/dist-packages/pip install yaml
+$ /path/to/blender/2.xx/python/bin/python3 ~/get-pip.py
+$ /path/to/blender/2.xx/python/bin/python /blender-version/2.xx/python/local/lib/python3.5/dist-packages/pip install yaml
 ```
 
 ### Demo
-1. ```git clone https://github.com/cmitash/physim-dataset-generator.git```
-2. in bashrc add line ```export PHYSIM_GENDATA=/path-to-repository```
-3. rename ```config.yml.table``` or ```config.yml.shelf``` to ```config.yml```
-4. ```python generate_pictures.py```
-5. the generated data can be found in the folder ```rendered_images```
+1. In ```~/.bashrc```, add line ```export PHYSIM_GENDATA=/path/to/repo```. 
+2. Run ```python generate_pictures.py -env=table``` 
+3. The generated data can be found in the folder ```rendered_images```. Available environments are ```table``` and ```shelf```.
 
 ### Output
-1. images of scenes.
-2. labeled bounding box files for each scene ```<label, tl_x, tl_y, br_x, br_y>```
-3. debug images indicating the bounding-boxes over the objects.
+1. Images of scenes.
+2. Labeled bounding box files for each scene ```<label, tl_x, tl_y, br_x, br_y>```
+3. Debug images indicating the bounding-boxes over the objects.
 4. ```.blend``` files to debug the simulation parameters.
 
 ### Parameters

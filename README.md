@@ -29,8 +29,10 @@ $ /path/to/blender/2.xx/python/bin/python /blender-version/2.xx/python/local/lib
 ```
 
 ### Demo
-In ```~/.bashrc```, add line ```export PHYSIM_GENDATA=/path/to/repo```
+In ```~/.bashrc```, add line ```export PHYSIM_GENDATA=/path/to/repo```.
+
 ```python generate_pictures.py -env=table```
+
 The generated data can be found in the folder ```rendered_images```. Available environments are ```table`` and ```shelf```.
 
 ### Output

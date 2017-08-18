@@ -1,7 +1,7 @@
 ## PHYSIM-DATASET-GENERATOR
 This repository implements a software tool for synthesizing images of physically realistic cluttered scenes 
 using 3D CAD models as described in our paper:
-#### A Self-supervised Learning System for Object Detection using Physics Simulation and Multi-view Pose Estimation ([pdf](https://arxiv.org/pdf/1703.03347.pdf))
+#### A Self-supervised Learning System for Object Detection using Physics Simulation and Multi-view Pose Estimation ([pdf](https://arxiv.org/pdf/1703.03347.pdf))([website](http://paul.rutgers.edu/~cm1074/PHYSIM.html))
 By Chaitanya Mitash, Kostas Bekris, Abdeslam Boularias (Rutgers University).
 
 To appear at the IEEE International Conference on Intelligent Robots and Systems (IROS), Vancouver, Canada, 2017.

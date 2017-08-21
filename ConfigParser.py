@@ -1,9 +1,14 @@
 import yaml
+import os,sys
 
 class ConfigParser:
 	data = []
 
 	def __init__(self, filepath):
+		if os.path.exists(filepath) == False:
+			print('please create config.yml file with simulation parameters !!!')
+			sys.exit()
+
 		with open(filepath,"r") as file_descriptor:
 			self.data=yaml.load(file_descriptor)
 

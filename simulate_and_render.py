@@ -121,8 +121,8 @@ if __name__ == "__main__":
                     if space.type == 'VIEW_3D':
                         space.viewport_shade = 'TEXTURED'
 
-        bpy.context.scene.render.use_raytrace = True
-        bpy.context.scene.render.use_shadows = True
+        bpy.context.scene.render.use_raytrace = False
+        bpy.context.scene.render.use_shadows = False
 
         for i in range(0,cam.numViews):
             cam.placeCamera(i)

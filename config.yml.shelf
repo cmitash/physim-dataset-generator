@@ -15,7 +15,7 @@ elmers_washable_no_run_school_glue, rawlings_baseball]
 params:
   num_images: 10
   minimum_objects_in_scene: 2
-  maximum_objects_in_scene: 4
+  maximum_objects_in_scene: 3
   range_x: [-0.20, 0.15]
   range_y: [-0.12, 0.12]
   range_z: [0.08, 0.12]

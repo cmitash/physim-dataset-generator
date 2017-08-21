@@ -19,19 +19,20 @@ To cite the work:
 ```
 ### Setup
 1. Download and extract [Blender](https://www.blender.org/features/releases/2-78/)
-2. In ```~/.bashrc```, add line ```export $BLENDER_PATH=/path/to/blender/blender```
+2. In ```~/.bashrc```, add line ```export BLENDER_PATH=/path/to/blender/blender```
 3. Get the ```get-pip.py``` file from the ```pip``` [documentation](https://pip.pypa.io/en/stable/installing/)
 4. Install the ```yaml``` package in the python packaged with blender using the commands below.
 
 ```shell
-$ /path/to/blender/2.xx/python/bin/python3 ~/get-pip.py
-$ /path/to/blender/2.xx/python/bin/python /blender-version/2.xx/python/local/lib/python3.5/dist-packages/pip install yaml
+$ /path/to/blender/2.xx/python/bin/python3.5m /path/to/get-pip/get-pip.py
+$ /path/to/blender/2.xx/python/bin/python3.5m /blender-version/2.xx/python/bin/pip install pyyaml
 ```
 
 ### Demo
-1. In ```~/.bashrc```, add line ```export PHYSIM_GENDATA=/path/to/repo```. 
-2. Run ```python generate_pictures.py -env=table``` 
-3. The generated data can be found in the folder ```rendered_images```. Available environments are ```table``` and ```shelf```.
+1. In ```~/.bashrc```, add line ```export PHYSIM_GENDATA=/path/to/repo```.
+2. Rename ```config.yml.shelf``` or ```config.yml.shelf``` to ```config.yml``` and modify simulation parameters if required.
+3. Run ```python generate_pictures.py``` 
+4. The generated data can be found in the folder ```rendered_images```. Available environments are ```table``` and ```shelf```.
 
 ### Output
 1. Images of scenes.

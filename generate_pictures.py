@@ -1,3 +1,11 @@
+"""
+@file generate_pictures.py
+@copyright Software License Agreement (BSD License).
+Copyright (c) 2017, Rutgers the State University of New Jersey, New Brunswick.
+All Rights Reserved. For a full description see the file named LICENSE.
+Authors: Chaitanya Mitash, Kostas Bekris, Abdeslam Boularias.
+"""
+
 import os, sys, shutil
 import os.path as osp
 import time, random

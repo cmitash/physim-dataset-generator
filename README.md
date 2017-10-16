@@ -36,7 +36,7 @@ $ /path/to/blender/2.xx/python/bin/python3.5m /blender-version/2.xx/python/bin/p
 
 ### Output
 1. Images of scenes.
-2. Labeled bounding box files for each scene ```<label, tl_x, tl_y, br_x, br_y>```
+2. Labeled bounding box files for each scene ```<label, tl_x, tl_y, br_x, br_y>``` or if the ```pixel``` label mode is selected, a pixel-wise labeled image is generated for each scene where the pixel value is the ground-truth class value.
 3. Debug images indicating the bounding-boxes over the objects.
 4. ```.blend``` files to debug the simulation parameters.
 
@@ -56,6 +56,7 @@ Models: [model_1, model_2, ...]
 
 params:
   num_images: <number of training images>
+  label_type: box
   minimum_objects_in_scene: <minimum object per scene>
   maximum_objects_in_scene: <minimum object per scene>
   range_x: [<min_x>, <max_x>]

@@ -75,7 +75,7 @@ class Label:
             seg_img = np.zeros((height,width,1), np.uint8)
 
             for k in range(0,len(bbox_list)):
-                mask_img_filepath = osp.join(syn_images_folder, 'image_%05d_%02d.png' % (i,k))
+                mask_img_filepath = osp.join(syn_images_folder, 'debug/image_%05d_%02d.png' % (i,k))
                 mask_image = cv2.imread(mask_img_filepath)
                 
                 for u in range(0, height):

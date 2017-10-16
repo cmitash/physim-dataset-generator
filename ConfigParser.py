@@ -38,6 +38,9 @@ class ConfigParser:
 	def getNumTrainingImages(self):
 		return self.data['params']['num_images']
 
+	def getLabelType(self):
+		return self.data['params']['label_type']
+
 	def getMinObjectsScene(self):
 		return self.data['params']['minimum_objects_in_scene']
 

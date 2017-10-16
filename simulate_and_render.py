@@ -52,9 +52,12 @@ if __name__ == "__main__":
         bpy.ops.import_scene.obj(filepath="obj_models/" + objFileName + "/" + objFileName + ".obj")
         imported = bpy.context.selected_objects[0]
         objectlist.append(imported.name)
+    
+    ## effect of illumination is currently disabled.
     for item in bpy.data.materials:
         print (item)
-        item.emit = 0.05
+        # item.emit = 0.05
+        item.use_shadeless = True
 
     num = 0
     numImages = cfg.getNumTrainingImages()
@@ -137,6 +140,28 @@ if __name__ == "__main__":
             output_img = "rendered_images/image_%05i.png" % num
             bpy.context.scene.render.filepath = os.path.join(g_repo_path, output_img) 
             bpy.ops.render.render(write_still=True)
+
+            ## Test Code for segmentation mask
+            for j in range(0, numObjectsInScene):
+                # make all items invisible
+                for item in bpy.data.materials:
+                    item.use_transparency = True
+                    item.transparency_method = 'MASK'
+                    item.alpha = 0
+
+                index = selectedobj[j]
+                shape_file = objectlist[index]
+                print ("materials")
+                print (bpy.data.objects[shape_file].material_slots[0])
+                bpy.data.objects[shape_file].material_slots[0].material.use_transparency = False
+                output_img = "rendered_images/image_%05i_%02i.png" % (num,j)
+                bpy.context.scene.render.filepath = os.path.join(g_repo_path, output_img) 
+                bpy.ops.render.render(write_still=True)
+
+            # restore the transparency
+            for item in bpy.data.materials:
+                item.use_transparency = False
+            ## Test Code for segmentation mask
 
             #2-D bounding boxes
             output_bbox = "rendered_images/debug/raw_bbox_%05i.txt" % num

@@ -47,6 +47,7 @@ cfg = ConfigParser("config.yml")
 
 num_of_images = cfg.getNumTrainingImages()
 pLabel = Label.Label()
+pLabel.get_segmentation_labels(syn_images_folder, num_of_images)
 pLabel.draw_bboxes(syn_images_folder, num_of_images)
 
 end = time.time()

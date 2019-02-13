@@ -143,21 +143,22 @@ if __name__ == "__main__":
             rot_y = random.randint(range_euler_y[0], range_euler_y[1])*3.14/180.0
             rot_z = random.randint(range_euler_z[0], range_euler_z[1])*3.14/180.0
 
-            # try to avoid collision in x-y plane while placement
-            # pos_x = 0
-            # pos_y = 0
-            # validPlacement = False
-            # while validPlacement == False:
-            #     validPlacement = True
-            #     pos_x = random.uniform(range_x[0], range_x[1])
-            #     pos_y = random.uniform(range_y[0], range_y[1])
-            #     curr_pt = [pos_x, pos_y]
-            #     for pt in placed_pts:
-            #         dist = distance.euclidean(pt, curr_pt)
-            #         if dist < 20.0:
-            #             validPlacement = False
+            # AVOID COLLISION MODULE STARTS
+            pos_x = 0
+            pos_y = 0
+            validPlacement = False
+            while validPlacement == False:
+                validPlacement = True
+                pos_x = random.uniform(range_x[0], range_x[1])
+                pos_y = random.uniform(range_y[0], range_y[1])
+                curr_pt = [pos_x, pos_y]
+                for pt in placed_pts:
+                    dist = distance.euclidean(pt, curr_pt)
+                    if dist < 0.10:
+                        validPlacement = False
             
-            # placed_pts.append([pos_x, pos_y])
+            placed_pts.append([pos_x, pos_y])
+            # AVOID COLLISION MODULE ENDS
 
             bpy.data.objects[shape_file].location = (pos_x, pos_y, pos_z)
             bpy.data.objects[shape_file].rotation_mode = 'XYZ'
@@ -198,8 +199,10 @@ if __name__ == "__main__":
                     if space.type == 'VIEW_3D':
                         space.viewport_shade = 'TEXTURED'
 
+
+        # BLENDER RENDER
         # TODO: Look into the effect of these parameters
-        # bpy.context.scene.render.use_shadows = False
+        bpy.context.scene.render.use_shadows = True
         bpy.context.scene.render.use_raytrace = False
 
         # Use nodes for rendering depth images and object masks
@@ -267,9 +270,9 @@ if __name__ == "__main__":
                 file.write("%i,%i\n" % (num,numObjectsInScene))
 
             # save to temp.blend
-            # mainfile_path = os.path.join("rendered_images/debug/", "blend_%05d.blend" % num)
-            # bpy.ops.file.autopack_toggle()
-            # bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
+            mainfile_path = os.path.join("rendered_images/debug/", "blend_%05d.blend" % num)
+            bpy.ops.file.autopack_toggle()
+            bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
 
             num = num + 1
             if num >= numImages:

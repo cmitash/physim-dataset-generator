@@ -1,0 +1,31 @@
+camera:
+  num_poses: 1
+  camera_intrinsics: [[619.2578, 0.0, 320], [0.0, 619.2578, 240], [0.0, 0.0, 1.0]]
+
+rest_surface:
+  type: bin
+  surface_pose: [0.41, -0.35, -0.115, 0.6123724, 0.6123724, 0.3535534, 0.3535534]
+
+Models: [dove, toothpaste]
+
+params:
+  num_images: 1
+  # options: obj/ply, default: ply
+  object_model_type: obj
+  # options: pixel, box
+  label_type: pixel
+  flat_rendering: False
+  num_object_instances: 15
+  minimum_objects_in_scene: 5
+  maximum_objects_in_scene: 15
+  # pose range
+  range_x: [0.25, 0.54]
+  range_y: [-0.25, -0.45]
+  range_z: [-0.09, 0]
+  range_euler_x: [0, 360]
+  range_euler_y: [0, 360]
+  range_euler_z: [0, 360]
+  num_simulation_steps: 60
+  light_position_range_x: [0.38, 0.45]
+  light_position_range_y: [-0.32, -0.36]
+  light_position_range_z: [0.1, 0.4]

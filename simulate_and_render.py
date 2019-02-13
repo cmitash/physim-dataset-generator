@@ -9,6 +9,7 @@ Authors: Chaitanya Mitash, Kostas Bekris, Abdeslam Boularias.
 import sys, os, tempfile, glob, shutil, time
 import bpy
 import math, random, numpy
+from scipy.spatial import distance
 
 # Verify if repository path is set in bashrc
 if os.environ.get('PHYSIM_GENDATA') == None:
@@ -18,14 +19,14 @@ if os.environ.get('PHYSIM_GENDATA') == None:
 g_repo_path = os.environ['PHYSIM_GENDATA']
 sys.path.append(g_repo_path)
 
-from Environment import Shelf, Table, Light
+from Environment import Shelf, Table, Bin, RandomTable, Light
 from ConfigParser import ConfigParser
 from Camera import Camera
 
 if __name__ == "__main__":
 
     ## read configuration file
-    cfg = ConfigParser("config.yml")
+    cfg = ConfigParser("config.yml", "camera_info.yml")
 
     ## initialize resting surface
     env = cfg.getSurfaceType()
@@ -33,12 +34,17 @@ if __name__ == "__main__":
         surface = Table('surface_models/table/table.obj')
     elif env == 'shelf':
         surface = Shelf('surface_models/shelf/shelf.obj')
+    elif env == 'bin':
+        surface = Bin('surface_models/bin/shelf.obj')
+    elif env == 'randomized_table':
+        surface = RandomTable('surface_models/random_table/table.obj')
+
     sPose = cfg.getSurfacePose()
     surface.setPose(sPose)
 
     ## initialize camera
     camIntrinsic = cfg.getCamIntrinsic()
-    camExtrinsic = cfg.getCamExtrinsic()
+    maxCamViews, camExtrinsic = cfg.getCamExtrinsic()  # maxCamViews: num of poses
     numViews = cfg.getNumViews()
     cam = Camera(camIntrinsic, camExtrinsic, numViews)
 
@@ -47,21 +53,50 @@ if __name__ == "__main__":
 
     ## initialize objects
     objModelList = cfg.getObjModelList()
-    objectlist = []
+    numInstances = cfg.getNumInstances()
+    objectlist = []  #object names
     for objFileName in objModelList:
-        bpy.ops.import_scene.obj(filepath="obj_models/" + objFileName + "/" + objFileName + ".obj")
-        imported = bpy.context.selected_objects[0]
-        objectlist.append(imported.name)
-    
-    ## effect of illumination is currently disabled.
-    for item in bpy.data.materials:
-        print (item)
-        # item.emit = 0.05
-        item.use_shadeless = True
+        for instances in range(0, numInstances):
+            
+            if cfg.getObjectModelType() == 'obj':
+                # for obj objects materials are read from the mtl file
+                bpy.ops.import_scene.obj(filepath="obj_models/" + objFileName + "/" + objFileName + ".obj")
+                imported = bpy.context.selected_objects[0]
+            else:
+                # for ply files material needs to be initialized
+                bpy.ops.import_mesh.ply(filepath="obj_models/" + objFileName + "/" + objFileName + ".ply")
 
+                # Initialize a basic new material for ply models
+                material_name = "mat_%s_%05i" % (objFileName, instances)
+                mat = bpy.data.materials.new(name=material_name)
+                mat.emit = 0
+                mat.use_vertex_color_paint = True
+                mat.use_cast_buffer_shadows = True
+                mat.diffuse_intensity = 0.8
+                mat.specular_intensity = 0.3
+
+                # for basic material
+                if cfg.isFlatRendering() == 'True':
+                    mat.use_cast_buffer_shadows = False
+                    mat.use_shadeless = True
+                    mat.use_raytrace = False
+                
+                imported = bpy.context.selected_objects[0]
+                imported.data.materials.append(mat)
+                imported.data.use_auto_smooth = True
+                imported.data.auto_smooth_angle = math.radians(10)   
+
+            objectlist.append(imported.name)
+    
     num = 0
     numImages = cfg.getNumTrainingImages()
     while num < numImages:
+        print ('Number of images synthesized..... ', num)
+        
+        if env == 'randomized_table':
+            surface.getRandomTexture()
+        elif env == 'bin':
+            surface.randomizeTexture()
 
         ## hide all objects
         for obj in objectlist:
@@ -85,23 +120,48 @@ if __name__ == "__main__":
         print ("selected set is : ", selectedobj)
         
         ## sample initial pose for each of the selected object
+        placed_pts = []
         for i in range(0, numObjectsInScene):
             index = selectedobj[i]
             shape_file = objectlist[index]
             sceneobjectlist[index] = shape_file
             bpy.data.objects[shape_file].hide = False
             bpy.data.objects[shape_file].hide_render = False
+            bpy.data.objects[shape_file].pass_index = i + 1
             range_x = cfg.getRangeX()
             range_y = cfg.getRangeY()
             range_z = cfg.getRangeZ()
-            bpy.data.objects[shape_file].location = (random.uniform(range_x[0], range_x[1]),
-                                                        random.uniform(range_y[0], range_y[1]),
-                                                        random.uniform(range_z[0], range_z[1]))
+            range_euler_x = cfg.getRangeEulerX()
+            range_euler_y = cfg.getRangeEulerY()
+            range_euler_z = cfg.getRangeEulerZ()
 
+            # random poses
+            pos_x = random.uniform(range_x[0], range_x[1])
+            pos_y = random.uniform(range_y[0], range_y[1])
+            pos_z = random.uniform(range_z[0], range_z[1])
+            rot_x = random.randint(range_euler_x[0], range_euler_x[1])*3.14/180.0
+            rot_y = random.randint(range_euler_y[0], range_euler_y[1])*3.14/180.0
+            rot_z = random.randint(range_euler_z[0], range_euler_z[1])*3.14/180.0
+
+            # try to avoid collision in x-y plane while placement
+            # pos_x = 0
+            # pos_y = 0
+            # validPlacement = False
+            # while validPlacement == False:
+            #     validPlacement = True
+            #     pos_x = random.uniform(range_x[0], range_x[1])
+            #     pos_y = random.uniform(range_y[0], range_y[1])
+            #     curr_pt = [pos_x, pos_y]
+            #     for pt in placed_pts:
+            #         dist = distance.euclidean(pt, curr_pt)
+            #         if dist < 20.0:
+            #             validPlacement = False
+            
+            # placed_pts.append([pos_x, pos_y])
+
+            bpy.data.objects[shape_file].location = (pos_x, pos_y, pos_z)
             bpy.data.objects[shape_file].rotation_mode = 'XYZ'
-            bpy.data.objects[shape_file].rotation_euler = (random.randint(0, 360)*3.14/180.0, 
-                                                           random.randint(0, 360)*3.14/180.0, 
-                                                           random.randint(0, 360)*3.14/180.0)
+            bpy.data.objects[shape_file].rotation_euler = (rot_x, rot_y, rot_z)
 
             bpy.context.scene.objects.active = bpy.context.scene.objects[shape_file]
             bpy.ops.rigidbody.object_add(type='ACTIVE')
@@ -112,6 +172,12 @@ if __name__ == "__main__":
             bpy.context.scene.objects[shape_file].rigid_body.linear_damping = 0.9
             bpy.context.scene.objects[shape_file].rigid_body.angular_damping = 0.9
 
+        if cfg.isFlatRendering() == 'True':
+            for item in bpy.data.materials:
+                item.use_shadeless = True
+        else:
+            for item in bpy.data.materials:
+                item.emit = random.uniform(0.0, 0.4)
 
         ## performing simulation
         framesIter = cfg.getNumSimulationSteps()
@@ -132,46 +198,78 @@ if __name__ == "__main__":
                     if space.type == 'VIEW_3D':
                         space.viewport_shade = 'TEXTURED'
 
+        # TODO: Look into the effect of these parameters
+        # bpy.context.scene.render.use_shadows = False
         bpy.context.scene.render.use_raytrace = False
-        bpy.context.scene.render.use_shadows = False
+
+        # Use nodes for rendering depth images and object masks
+        bpy.context.scene.render.use_compositing = True
+        bpy.context.scene.render.layers["RenderLayer"].use_pass_object_index = True
+        bpy.context.scene.render.use_stamp_frame = False
+        bpy.context.scene.use_nodes = True
 
         for i in range(0,cam.numViews):
-            cam.placeCamera(i)
-            output_img = "rendered_images/image_%05i.png" % num
+            cam_view = random.randint(0, maxCamViews-1)
+            cam_pose = cam.placeCamera(cam_view)
+            tree = bpy.context.scene.node_tree
+            links = tree.links
+
+            for n in tree.nodes:
+                tree.nodes.remove(n)
+
+            render_node = tree.nodes.new('CompositorNodeRLayers')
+
+            # For depth rendering
+            bpy.context.scene.render.image_settings.file_format = 'OPEN_EXR'
+            depth_node = tree.nodes.new('CompositorNodeOutputFile') 
+            depth_node.base_path = "rendered_images/image_%05i/depth/" % num
+            depth_node.file_slots[0].path = "image_"
+            links.new(render_node.outputs[2], depth_node.inputs[0])
+
+            for j in range(0, numObjectsInScene):
+
+                bpy.context.scene.render.image_settings.file_format = 'PNG'
+                bpy.context.scene.render.image_settings.color_mode = 'BW'
+                tmp_node = tree.nodes.new('CompositorNodeIDMask')
+                tmp_node.index = j + 1
+                links.new(render_node.outputs[14], tmp_node.inputs[0])
+
+                tmp_out = tree.nodes.new('CompositorNodeOutputFile') 
+                tmp_out.base_path = "rendered_images/debug/"
+                tmp_out.file_slots[0].path = "image_%05i_%02i_" % (num, j)
+
+                links.new(tmp_node.outputs[0], tmp_out.inputs[0])
+
+            output_img = "rendered_images/image_%05i/rgb/image.png" % num
+            bpy.context.scene.render.resolution_percentage = 100
+            bpy.context.scene.render.image_settings.file_format = 'PNG'
+            bpy.context.scene.render.image_settings.color_mode = 'RGB'
             bpy.context.scene.render.filepath = os.path.join(g_repo_path, output_img) 
             bpy.ops.render.render(write_still=True)
 
-            if cfg.getLabelType() == 'pixel':
-                for j in range(0, numObjectsInScene):
-                    # make all items invisible
-                    for item in bpy.data.materials:
-                        item.use_transparency = True
-                        item.transparency_method = 'MASK'
-                        item.alpha = 0
+            os.makedirs("rendered_images/image_%05i/labels" % num)
 
-                    index = selectedobj[j]
-                    shape_file = objectlist[index]
-                    bpy.data.objects[shape_file].material_slots[0].material.use_transparency = False
-                    output_img = "rendered_images/debug/image_%05i_%02i.png" % (num,j)
-                    bpy.context.scene.render.filepath = os.path.join(g_repo_path, output_img) 
-                    bpy.ops.render.render(write_still=True)
+            # Write class id, pose
+            output_filepath = "rendered_images/debug/class_id_%05i.txt" % num
 
-                # restore the transparency
-                for item in bpy.data.materials:
-                    item.use_transparency = False
-
-            #2-D bounding boxes
-            output_bbox = "rendered_images/debug/raw_bbox_%05i.txt" % num
             for i in range(0, numObjectsInScene):
                 index = selectedobj[i]
                 shape_file = sceneobjectlist[index]
-                print (index, shape_file)
-                x, y, width, height = cam.write_bounds_2d(output_bbox, bpy.data.objects[shape_file], index)
+                classId = int(index/numInstances)
+                with open(output_filepath, "a+") as file:
+                    file.write("%i\n" % classId)
+
+                output_pose = "rendered_images/image_%05i/labels/obj_%02i.yml" % (num, classId + 1)
+                cam.write_object_pose(output_pose, bpy.data.objects[shape_file], classId, cam_pose)
+
+            output_filepath = "rendered_images/dataset_info.txt"
+            with open(output_filepath, "a+") as file:
+                file.write("%i,%i\n" % (num,numObjectsInScene))
 
             # save to temp.blend
-            mainfile_path = os.path.join("rendered_images/debug/", "blend_%05d.blend" % num)
-            bpy.ops.file.autopack_toggle()
-            bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
+            # mainfile_path = os.path.join("rendered_images/debug/", "blend_%05d.blend" % num)
+            # bpy.ops.file.autopack_toggle()
+            # bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
 
             num = num + 1
             if num >= numImages:

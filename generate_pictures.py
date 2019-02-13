@@ -43,15 +43,16 @@ try:
 except:
     print('render failed. render_cmd: %s' % (render_cmd))
 
-cfg = ConfigParser("config.yml")
+cfg = ConfigParser("config.yml", "camera_info.yml")
 
 num_of_images = cfg.getNumTrainingImages()
 pLabel = Label.Label()
 
+frame_number = cfg.getNumSimulationSteps() - 1
 if cfg.getLabelType() == 'pixel':
-	pLabel.get_segmentation_labels(syn_images_folder, num_of_images)
+	pLabel.get_segmentation_labels(syn_images_folder, num_of_images, frame_number)
 else:
-	pLabel.draw_bboxes(syn_images_folder, num_of_images)
+	pLabel.draw_bboxes(syn_images_folder, num_of_images, frame_number)
 
 end = time.time()
 print ("%d images generated in %f seconds!" % (num_of_images, end - start))

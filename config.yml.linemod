@@ -1,0 +1,26 @@
+camera:
+  num_poses: 20
+  camera_intrinsics: [[572.4114, 0.0, 320], [0.0, 573.57043, 240], [0.0, 0.0, 1.0]]
+
+rest_surface:
+  type: randomized_table
+  surface_pose: [0, 0, 0, 0.7, 0.7, 0, 0]
+
+Models: [obj_01, obj_02, obj_05, obj_06, obj_08, obj_09, obj_10, obj_11, obj_12]
+
+params:
+  num_images: 1
+  label_type: pixel
+  num_object_instances: 1
+  minimum_objects_in_scene: 9
+  maximum_objects_in_scene: 9
+  range_x: [-0.25, 0.25]
+  range_y: [-0.25, 0.25]
+  range_z: [0.05, 0.1]
+  range_euler_x: [0, 0]
+  range_euler_y: [0, 0]
+  range_euler_z: [0, 0]
+  num_simulation_steps: 20
+  light_position_range_x: [0, 0]
+  light_position_range_y: [0, 0]
+  light_position_range_z: [0.4, 0.6]

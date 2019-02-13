@@ -52,11 +52,39 @@ class Camera:
         bpy.data.objects['Camera'].rotation_mode = 'QUATERNION'
         bpy.data.objects['Camera'].rotation_quaternion = (self.camExtrinsic[view][3], self.camExtrinsic[view][4],
                                                            self.camExtrinsic[view][5], self.camExtrinsic[view][6])
+        return self.camExtrinsic[view]
 
-    def write_bounds_2d(self, filepath, me_ob, index):
+    def write_object_pose(self, filepath, me_ob, index, cam_pose):
         with open(filepath, "a+") as file:
-            print("get bounding box of " + me_ob.name)
-            print("3d location ", me_ob.matrix_world.translation)
+
+            cam_trans = Vector((cam_pose[0], cam_pose[1], cam_pose[2]))
+            cam_rot = Quaternion((cam_pose[3], cam_pose[4], cam_pose[5], cam_pose[6]))
+            
+            initrot1 = Matrix(((-1,0,0), 
+                            (0,1,0), 
+                            (0,0,-1)))
+            initrot2 = Matrix(((-1,0,0), 
+                            (0,-1,0), 
+                            (0,0,1)))
+            initrot1 = initrot1.transposed()
+            initrot2 = initrot2.transposed()
+            cam_rot = cam_rot.to_matrix()
+            cam_rot = cam_rot*initrot2
+            cam_rot = cam_rot*initrot1
+
+            cam_rot = cam_rot.transposed()
+            cam_trans = cam_rot*cam_trans
+
+            inv_cam_matrix = Matrix(
+                                    ((cam_rot[0][0], cam_rot[0][1], cam_rot[0][2], -cam_trans[0]),
+                                    (cam_rot[1][0], cam_rot[1][1], cam_rot[1][2], -cam_trans[1]),
+                                    (cam_rot[2][0], cam_rot[2][1], cam_rot[2][2], -cam_trans[2]),
+                                    (0, 0, 0, 1)))
+
+            object_pose_world = me_ob.matrix_world
+            object_pose_camera = inv_cam_matrix * object_pose_world
+            object_trans_camera = object_pose_camera.translation
+
             x, y, width, height = self.camera_view_bounds_2d(me_ob)
             if x > bpy.context.scene.render.resolution_x or \
                y > bpy.context.scene.render.resolution_y or \
@@ -64,7 +92,6 @@ class Camera:
                y + height < 0 or \
                width < 0 or height < 0:
                 print ("bbox out of range: (x, y, width, height), ignored!", x, y, width, height)
-                return -1, -1, -1, -1
             else:
                 # if bbox is out of camera range, crop it
                 if x < 0:
@@ -77,8 +104,12 @@ class Camera:
                     width = bpy.context.scene.render.resolution_x - x
                 if y + height > bpy.context.scene.render.resolution_y:
                     height = bpy.context.scene.render.resolution_y - y
-                file.write("%i,%i,%i,%i,%i,%f\n" % (index, x, y, width, height, me_ob.matrix_world.translation[0]))
-                return x, y, width, height
+
+                if width > 20 and height > 20:
+                    file.write("- rotation : [%f, %f, %f, %f, %f, %f, %f, %f, %f]\n  translation : [%f, %f, %f]\n" % (object_pose_camera[0][0], object_pose_camera[0][1], object_pose_camera[0][2],
+                                                                                                                    object_pose_camera[1][0], object_pose_camera[1][1], object_pose_camera[1][2],
+                                                                                                                    object_pose_camera[2][0], object_pose_camera[2][1], object_pose_camera[2][2],
+                                                                                                                    object_pose_camera[0][3], object_pose_camera[1][3], object_pose_camera[2][3]))
 
     def get_3x4_RT_matrix_from_blender(self):
         # bcam stands for blender camera
@@ -134,5 +165,4 @@ class Camera:
             if coords.y > max_y:
                 max_y = coords.y
 
-        print ("bbox : ", min_x, max_x, min_y, max_y)
         return (min_x, min_y, max_x - min_x, max_y - min_y)

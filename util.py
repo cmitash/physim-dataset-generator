@@ -2,32 +2,36 @@ import os,sys
 import numpy as np
 
 
-def organize_result(inpath='./rendered_images/',outpath='./rendered_images_org/'):
-  if os.path.exists(inpath):
-    print('inpath is none!')
+def organize_result(inpath='./occ_training_data/',outpath='/media/chaitanya/DATADRIVE0/github/training_datasets/occ/syn_cycles/'):
   
-  folders=os.listdir(inpath)
-  print('# folders: ',len(folders))
+  num_training_images = 19160
+
+  if not os.path.exists(inpath):
+    print('inpath is null!')
+  
   src=['rgb/*', 'labels/edge_img.png', 'labels/seg_img.png', 'depth/*']
   dst=['rgb/','edge_labels/','seg_labels/','depth/']
+
   for item in dst:
-    # if os.path.exists(outpath+item):
-    os.makedirs(outpath+item)
-  cnt=0
-  for folder in folders:
-    if 'image' not in folder:
-      continue
+    if not os.path.exists(outpath+item):
+      os.makedirs(outpath+item)
+
+  cnt = 0
+
+  for scene_id in range(0, num_training_images):
+
     for i in range(len(src)):
       if 'depth' in src[i]:
-        command='cp '+inpath+folder+'/'+src[i]+' '+outpath+dst[i]+ '%06d' % cnt +'.exr'
+        command ='cp ' + inpath + 'image_%05d' % scene_id + '/' + src[i] + ' ' + outpath + dst[i] + '%06d' % cnt + '.exr'
       else:
-        command='cp '+inpath+folder+'/'+src[i]+' '+outpath+dst[i]+ '%06d' % cnt +'.png'
+        command ='cp ' + inpath + 'image_%05d' % scene_id + '/' + src[i] + ' ' + outpath + dst[i] + '%06d' % cnt + '.png'
+
       print(command)
-      res=os.system(command)
-      if (res!=0) :
+      res = os.system(command)
+      if (res != 0) :
         print('error:\n',command)
         exit(1)
-    cnt+=1
+    cnt += 1
 
 def renameDepth(inpath='./rendered_images2/depth/'):
   files = os.listdir(inpath)

@@ -26,7 +26,10 @@ g_blank_blend_file_path = 'blank.blend'
 
 # call blender to render images
 blank_file = osp.join(g_blank_blend_file_path)
+
 render_code = osp.join('simulate_and_render.py')
+# render_code = osp.join('place_and_render_jdx.py')
+# render_code = osp.join('place_and_render_cups.py')
 
 syn_images_folder = 'rendered_images'
 if os.path.exists(syn_images_folder):

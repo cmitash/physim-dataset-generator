@@ -1,28 +1,34 @@
 camera:
-  num_poses: 20
-  camera_intrinsics: [[572.4114, 0.0, 320], [0.0, 573.57043, 240], [0.0, 0.0, 1.0]]
+  num_poses: 1
+  camera_intrinsics: [[619.2578, 0.0, 320], [0.0, 619.2578, 240], [0.0, 0.0, 1.0]]
 
 rest_surface:
-  type: randomized_table
-  surface_pose: [0, 0, 0, 0.7, 0.7, 0, 0]
+  type: bin
+  surface_pose: [0.41, -0.35, -0.115, 0.6123724, 0.6123724, 0.3535534, 0.3535534]
 
-Models: [obj_01, obj_02, obj_05, obj_06, obj_08, obj_09, obj_10, obj_11, obj_12]
+Models: [dove, toothpaste]
 
 params:
-  num_images: 1
-  object_model_type: ply
+  num_images: 5000
+  # options: obj/ply, default: ply
+  object_model_type: obj
+  # options: pixel, box
   label_type: pixel
-  num_object_instances: 1
-  flat_rendering: False
-  minimum_objects_in_scene: 9
-  maximum_objects_in_scene: 9
-  range_x: [-0.25, 0.25]
-  range_y: [-0.25, 0.25]
-  range_z: [0.05, 0.1]
-  range_euler_x: [0, 0]
-  range_euler_y: [0, 0]
-  range_euler_z: [0, 0]
-  num_simulation_steps: 20
-  light_position_range_x: [0, 0]
-  light_position_range_y: [0, 0]
-  light_position_range_z: [0.4, 0.6]
+  # options: cycles, blender, flat
+  renderer: cycles
+  min_distance: 0.02
+  save_debug: True
+  num_object_instances: 10
+  minimum_objects_in_scene: 5
+  maximum_objects_in_scene: 10
+  # pose range
+  range_x: [0.25, 0.54]
+  range_y: [-0.25, -0.45]
+  range_z: [-0.09, 0]
+  range_euler_x: [0, 360]
+  range_euler_y: [0, 360]
+  range_euler_z: [0, 360]
+  num_simulation_steps: 15
+  light_position_range_x: [0.38, 0.45]
+  light_position_range_y: [-0.32, -0.36]
+  light_position_range_z: [0.1, 0.4]

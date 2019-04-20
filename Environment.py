@@ -85,8 +85,32 @@ class RandomTable:
         mat = object_instance.data.materials['Material']
         tex = bpy.data.textures.new('random_image', 'IMAGE')
         tex.image = img
-        slot = mat.texture_slots.add()
-        slot.texture = tex
+        mat.active_texture = tex
+
+    def getCyclesTexture(self):
+        object_instance = bpy.data.objects["Cube"]
+
+        # set based on the number of candidate material images
+        img_num = random.randint(1, 4)
+        img_name = "surface_models/random_table/images/image_%05i.jpg" % img_num
+        img = bpy.data.images.load(img_name)
+        mat = object_instance.data.materials['Material']
+        mat.use_nodes = True
+
+        material_node = mat.node_tree.nodes.get('Material Output')
+        if material_node == None:
+            material_node = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+
+        diffuse_node = mat.node_tree.nodes.get('Diffuse BSDF')
+        if diffuse_node == None:
+            diffuse_node = mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
+
+        tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
+        tex_node.image = img
+
+        mat.node_tree.links.new(tex_node.outputs[0], diffuse_node.inputs[0])
+        mat.node_tree.links.new(diffuse_node.outputs[0], material_node.inputs[0])
+
 
 class Bin:
     def __init__(self, shape_file):
@@ -102,9 +126,6 @@ class Bin:
                 planes.rigid_body.use_margin = True
                 planes.rigid_body.collision_margin = 0.01
                 planes.hide_render = False
-
-
-        
 
     def setPose(self, pose):
         for planes in bpy.data.objects:
@@ -124,6 +145,10 @@ class Bin:
                 new_mat.diffuse_color = (r,g,b)
                 slot.material = new_mat
 
+    def hideBin(self):
+        for planes in bpy.data.objects:
+            if 'Plane' in planes.name:
+                planes.hide_render = True
 
 class Light:
     lightColors = [[255,197,142], [255,214,170], [255,241,224],

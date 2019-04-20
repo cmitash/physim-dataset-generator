@@ -8,6 +8,8 @@ Authors: Chaitanya Mitash, Kostas Bekris, Abdeslam Boularias.
 
 import yaml
 import os,sys
+import numpy as np
+import transform
 
 class ConfigParser:
 	data = []
@@ -43,6 +45,25 @@ class ConfigParser:
 			cam_poses.append(cam_pose)
 		return num_poses, cam_poses
 
+	def getObjPoses(self, scene_id, obj_id):
+		filepath = '/media/chaitanya/DATADRIVE0/github/physim-dataset-generator/object_poses/%05d_%02d.yml' % (scene_id, obj_id)
+		ff = open(filepath, "r")
+		pose_data=yaml.load(ff)
+
+		num_poses = len(pose_data)
+		obj_poses = []
+		for pose in range(0, num_poses):
+			trans = pose_data[pose]['translation']
+			rot = pose_data[pose]['rotation']
+			rotm = np.array([[rot[0], rot[1], rot[2], trans[0]], 
+                            [rot[3], rot[4], rot[5], trans[1]], 
+                            [rot[6], rot[7], rot[8], trans[2]],
+                            [0, 0, 0, 1]])
+			quat = transform.quaternion_from_matrix(rotm)
+			obj_pose = [trans[0], trans[1], trans[2], quat[0], quat[1], quat[2], quat[3]]
+			obj_poses.append(obj_pose)
+		return num_poses, obj_poses
+
 	def getObjModelList(self):
 		return self.data['Models']
 
@@ -57,6 +78,15 @@ class ConfigParser:
 
 	def getLabelType(self):
 		return self.data['params']['label_type']
+
+	def getRenderer(self):
+		return self.data['params']['renderer']
+
+	def getMinDistance(self):
+		return self.data['params']['min_distance']
+
+	def saveDebugFile(self):
+		return self.data['params']['save_debug']
 
 	def getMinObjectsScene(self):
 		return self.data['params']['minimum_objects_in_scene']

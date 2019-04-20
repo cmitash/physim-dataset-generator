@@ -10,6 +10,7 @@ import sys, os, tempfile, glob, shutil, time
 import bpy
 import math, random, numpy
 from scipy.spatial import distance
+from mathutils import Vector, Matrix, Quaternion
 
 # Verify if repository path is set in bashrc
 if os.environ.get('PHYSIM_GENDATA') == None:
@@ -41,6 +42,7 @@ if __name__ == "__main__":
 
     sPose = cfg.getSurfacePose()
     surface.setPose(sPose)
+    surface.hideBin()
 
     ## initialize camera
     camIntrinsic = cfg.getCamIntrinsic()
@@ -86,6 +88,28 @@ if __name__ == "__main__":
     
     num = 0
     numImages = cfg.getNumTrainingImages()
+    cam_pose = cam.placeCamera(0)
+
+    cam_trans = Vector((cam_pose[0], cam_pose[1], cam_pose[2]))
+    cam_rot = Quaternion((cam_pose[3], cam_pose[4], cam_pose[5], cam_pose[6]))
+    
+    initrot1 = Matrix(((-1,0,0), 
+                    (0,1,0), 
+                    (0,0,-1)))
+    initrot2 = Matrix(((-1,0,0), 
+                    (0,-1,0), 
+                    (0,0,1)))
+    initrot1 = initrot1.transposed()
+    initrot2 = initrot2.transposed()
+    cam_rot = cam_rot.to_matrix()
+    cam_rot = cam_rot*initrot2
+    cam_rot = cam_rot*initrot1
+
+    cam_matrix = Matrix(((cam_rot[0][0], cam_rot[0][1], cam_rot[0][2], cam_trans[0]),
+                        (cam_rot[1][0], cam_rot[1][1], cam_rot[1][2], cam_trans[1]),
+                        (cam_rot[2][0], cam_rot[2][1], cam_rot[2][2], cam_trans[2]),
+                        (0, 0, 0, 1)))
+
     while num < numImages:
         print ('Number of images synthesized..... ', num)
         
@@ -100,23 +124,26 @@ if __name__ == "__main__":
             bpy.data.objects[obj].hide_render = True
             bpy.data.objects[obj].location[0] = 100.0
 
-        ## choose a random subset of objects for the scene
+        n1_poses, o1_poses = cfg.getObjPoses(num, 1)
+        n2_poses, o2_poses = cfg.getObjPoses(num, 2)
+
+        numObjectsInScene = n1_poses + n2_poses
+
         sceneobjectlist = list(objectlist)
-        minObjects = cfg.getMinObjectsScene()
-        maxObjects = cfg.getMaxObjectsScene()
-        numObjectsInScene = random.randint(minObjects, maxObjects)
         selectedobj = list()
-        while len(selectedobj) < numObjectsInScene:
-            index = random.randint(0, len(objectlist)-1)
-            if index in selectedobj:
-                continue
+
+        for index in range(0, n1_poses):
+            selectedobj.append(index)
+
+        for index in range(numInstances, numInstances + n2_poses):
             selectedobj.append(index)
 
         print ("numObjectsInScene : ", numObjectsInScene)
         print ("selected set is : ", selectedobj)
+
+        o1_poses = o1_poses + o2_poses
         
         ## sample initial pose for each of the selected object
-        placed_pts = []
         for i in range(0, numObjectsInScene):
             index = selectedobj[i]
             shape_file = objectlist[index]
@@ -124,41 +151,29 @@ if __name__ == "__main__":
             bpy.data.objects[shape_file].hide = False
             bpy.data.objects[shape_file].hide_render = False
             bpy.data.objects[shape_file].pass_index = i + 1
-            range_x = cfg.getRangeX()
-            range_y = cfg.getRangeY()
-            range_z = cfg.getRangeZ()
-            range_euler_x = cfg.getRangeEulerX()
-            range_euler_y = cfg.getRangeEulerY()
-            range_euler_z = cfg.getRangeEulerZ()
 
-            # random poses
-            pos_x = random.uniform(range_x[0], range_x[1])
-            pos_y = random.uniform(range_y[0], range_y[1])
-            pos_z = random.uniform(range_z[0], range_z[1])
-            rot_x = random.randint(range_euler_x[0], range_euler_x[1])*3.14/180.0
-            rot_y = random.randint(range_euler_y[0], range_euler_y[1])*3.14/180.0
-            rot_z = random.randint(range_euler_z[0], range_euler_z[1])*3.14/180.0
+            obj_trans = Vector((o1_poses[i][0], o1_poses[i][1], o1_poses[i][2]))
+            obj_rot = Quaternion((o1_poses[i][3], o1_poses[i][4], o1_poses[i][5], o1_poses[i][6]))
+            obj_rot = obj_rot.to_matrix()
 
-            # AVOID COLLISION in XY Plane
-            pos_x = 0
-            pos_y = 0
-            validPlacement = False
-            while validPlacement == False:
-                validPlacement = True
-                pos_x = random.uniform(range_x[0], range_x[1])
-                pos_y = random.uniform(range_y[0], range_y[1])
-                curr_pt = [pos_x, pos_y]
-                for pt in placed_pts:
-                    dist = distance.euclidean(pt, curr_pt)
-                    if dist < cfg.getMinDistance():
-                        validPlacement = False
-            
-            placed_pts.append([pos_x, pos_y])
-            # AVOID COLLISION MODULE ENDS
+            obj_pose = Matrix(((obj_rot[0][0], obj_rot[0][1], obj_rot[0][2], obj_trans[0]),
+                                (obj_rot[1][0], obj_rot[1][1], obj_rot[1][2], obj_trans[1]),
+                                (obj_rot[2][0], obj_rot[2][1], obj_rot[2][2], obj_trans[2]),
+                                (0, 0, 0, 1)))
 
-            bpy.data.objects[shape_file].location = (pos_x, pos_y, pos_z)
-            bpy.data.objects[shape_file].rotation_mode = 'XYZ'
-            bpy.data.objects[shape_file].rotation_euler = (rot_x, rot_y, rot_z)
+            obj_pose = cam_matrix*obj_pose
+
+            obj_rot = Matrix(((obj_pose[0][0], obj_pose[0][1], obj_pose[0][2]),
+                                (obj_pose[1][0], obj_pose[1][1], obj_pose[1][2]),
+                                (obj_pose[2][0], obj_pose[2][1], obj_pose[2][2])))
+
+            trans = obj_pose.translation
+            rotq = obj_rot.to_quaternion()
+            print (rotq)
+
+            bpy.data.objects[shape_file].location = (trans[0], trans[1], trans[2])
+            bpy.data.objects[shape_file].rotation_mode = 'QUATERNION'
+            bpy.data.objects[shape_file].rotation_quaternion = (rotq[0], rotq[1], rotq[2], rotq[3])
 
             bpy.context.scene.objects.active = bpy.context.scene.objects[shape_file]
             bpy.ops.rigidbody.object_add(type='ACTIVE')
@@ -313,10 +328,10 @@ if __name__ == "__main__":
                 file.write("%i,%i\n" % (num,numObjectsInScene))
 
             # save to temp.blend
-            # if cfg.saveDebugFile() == True: 
-            #     mainfile_path = os.path.join("rendered_images/debug/", "blend_%05d.blend" % num)
-            #     bpy.ops.file.autopack_toggle()
-            #     bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
+            if cfg.saveDebugFile() == True: 
+                mainfile_path = os.path.join("rendered_images/debug/", "blend_%05d.blend" % num)
+                bpy.ops.file.autopack_toggle()
+                bpy.ops.wm.save_as_mainfile(filepath=mainfile_path)
 
             num = num + 1
             if num >= numImages:

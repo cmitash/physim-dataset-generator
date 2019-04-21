@@ -84,6 +84,63 @@ if __name__ == "__main__":
 
             objectlist.append(imported.name)
     
+    # FLAT RENDERING BLANDER INTERNAL
+    if cfg.getRenderer() == 'flat':
+        bpy.context.scene.render.use_raytrace = False
+        bpy.context.scene.render.use_shadows = False
+        bpy.context.scene.render.use_antialiasing = False
+        bpy.context.scene.render.use_textures = True
+        for item in bpy.data.materials:
+            item.use_shadeless = True
+            item.use_cast_buffer_shadows = False
+
+    # BLENDER RENDER::TODO: Look into the effect of these parameters
+    if cfg.getRenderer() == 'blender':
+        bpy.context.scene.render.use_shadows = True
+        bpy.context.scene.render.use_raytrace = False
+        bpy.context.scene.render.use_antialiasing = True
+        bpy.context.scene.render.use_textures = True
+        for item in bpy.data.materials:
+            item.emit = random.uniform(0.1, 0.6)
+
+    # CYCLES RENDERER
+    if cfg.getRenderer() == 'cycles':
+        bpy.context.scene.render.use_shadows = True
+        bpy.context.scene.render.use_raytrace = True
+        bpy.context.scene.render.use_antialiasing = True
+        bpy.context.scene.render.use_textures = True
+        bpy.context.scene.render.engine = 'CYCLES'
+        bpy.context.scene.cycles.device = 'GPU'
+        bpy.context.scene.cycles.samples = 100
+
+        # For Cycles Material
+        if cfg.getObjectModelType() == 'obj':
+            bpy.ops.ml.refresh()
+            for item in bpy.data.materials:
+                texture_node = item.node_tree.nodes.get('Image Texture')
+                material_node = item.node_tree.nodes.get('Material Output')
+                if not texture_node == None:
+                    if not material_node == None:
+                        diffuse_node = item.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
+                        item.node_tree.links.new(texture_node.outputs[0], diffuse_node.inputs[0])
+                        item.node_tree.links.new(diffuse_node.outputs[0], material_node.inputs[0])
+        else:
+            for item in object_materials:
+                item.use_nodes = True
+                attr_node = item.node_tree.nodes.new('ShaderNodeAttribute')
+                attr_node.attribute_name = "Col"
+
+                diffuse_node = item.node_tree.nodes.get('Diffuse BSDF')
+                if diffuse_node == None:
+                    diffuse_node = item.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
+
+                material_node = item.node_tree.nodes.get('Material Output')
+                if material_node == None:
+                    material_node = item.node_tree.nodes.new('ShaderNodeOutputMaterial')
+
+                item.node_tree.links.new(attr_node.outputs[0], diffuse_node.inputs[0])
+                item.node_tree.links.new(diffuse_node.outputs[0], material_node.inputs[0])
+
     num = 0
     numImages = cfg.getNumTrainingImages()
     while num < numImages:
@@ -188,57 +245,8 @@ if __name__ == "__main__":
                     if space.type == 'VIEW_3D':
                         space.viewport_shade = 'TEXTURED'
 
-        # FLAT RENDERING BLANDER INTERNAL
-        if cfg.getRenderer() == 'flat':
-            for item in bpy.data.materials:
-                item.use_shadeless = True
-                item.use_cast_buffer_shadows = False
-
-        # BLENDER RENDER::TODO: Look into the effect of these parameters
-        if cfg.getRenderer() == 'blender':
-            bpy.context.scene.render.use_shadows = True
-            bpy.context.scene.render.use_raytrace = False
-            for item in bpy.data.materials:
-                item.emit = random.uniform(0.1, 0.6)
-
-        # CYCLES RENDERER
+        
         if cfg.getRenderer() == 'cycles':
-            bpy.context.scene.render.use_shadows = True
-            bpy.context.scene.render.use_raytrace = True
-            bpy.context.scene.render.engine = 'CYCLES'
-            bpy.context.scene.cycles.device = 'GPU'
-
-            bpy.context.scene.render.use_antialiasing = True
-            bpy.context.scene.render.use_textures = True
-            bpy.context.scene.cycles.samples = 100
-
-            # For Cycles Material
-            if cfg.getObjectModelType() == 'obj':
-                bpy.ops.ml.refresh()
-                for item in bpy.data.materials:
-                    texture_node = item.node_tree.nodes.get('Image Texture')
-                    material_node = item.node_tree.nodes.get('Material Output')
-                    if not texture_node == None:
-                        if not material_node == None:
-                            diffuse_node = item.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
-                            item.node_tree.links.new(texture_node.outputs[0], diffuse_node.inputs[0])
-                            item.node_tree.links.new(diffuse_node.outputs[0], material_node.inputs[0])
-            else:
-                for item in object_materials:
-                    item.use_nodes = True
-                    attr_node = item.node_tree.nodes.new('ShaderNodeAttribute')
-                    attr_node.attribute_name = "Col"
-
-                    diffuse_node = item.node_tree.nodes.get('Diffuse BSDF')
-                    if diffuse_node == None:
-                        diffuse_node = item.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
-
-                    material_node = item.node_tree.nodes.get('Material Output')
-                    if material_node == None:
-                        material_node = item.node_tree.nodes.new('ShaderNodeOutputMaterial')
-
-                    item.node_tree.links.new(attr_node.outputs[0], diffuse_node.inputs[0])
-                    item.node_tree.links.new(diffuse_node.outputs[0], material_node.inputs[0])
 
             if env == 'randomized_table':
                 surface.getCyclesTexture()
